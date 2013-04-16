@@ -21,11 +21,10 @@ class CreateStory(CreateView):
         kwargs['assignment'] = get_object_or_404(Assignment, pk=self.kwargs.get('assignment'))
         return kwargs
     
-    
     def form_valid(self, form):
         """
         Provides author (logged-in user) and assignment (from url)
-        data to the StoryForm instance.
+        data to the Story instance created by the StoryForm.
         """
         form.instance.author = self.request.user
         form.instance.assignment = get_object_or_404(Assignment, pk=self.kwargs.get('assignment'))

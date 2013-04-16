@@ -1,8 +1,7 @@
 """
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
+Tests for the captioner app.
 
-Replace this with more appropriate tests for your application.
+@todo: test the actual views.  These tests focus mainly on form validation.
 """
 
 from django.test import TestCase
@@ -17,7 +16,7 @@ class AssignmentFormTests(TestCase):
     """
     Simple tests of submitting the assignment form.
     Most of the heavy validation lifting is done in the form,
-    so this is where's I'm concentrating on testing.
+    so this is where I'm concentrating on testing.
     """
     
     def setUp(self):
@@ -28,10 +27,10 @@ class AssignmentFormTests(TestCase):
         self.assignment = Assignment.objects.create(name='Test Assignment',
                                      help="Test help",
                                      story_min_length=1,
-                                     story_max_length=500
-                                     )
+                                     story_max_length=500)
+
+        #make some images and associate them with the assignment.
         self.images = []
-        
         for i in range(3):
             story_image = StoryImage.objects.create(image='test_image_%s.jpg' % i)
             AssignmentImage.objects.create(image=story_image,
@@ -39,6 +38,7 @@ class AssignmentFormTests(TestCase):
                                            keywords="test, testing",
                                            )
             self.images.append(story_image)
+
         self.image = self.images[0]
         self.assignment_image = self.image.assignmentimage_set.all()[0]
         self.user = User.objects.create_user(username='test_user', email='test@test.com', password='test_pass')
@@ -68,11 +68,12 @@ class AssignmentFormTests(TestCase):
         form = StoryForm(data=form_data, assignment=self.assignment)
         self.assertTrue(form.is_valid())
 
+        #while the form is valid, the Story object isn't, as it has no author or assignment.
         self.assertRaises(IntegrityError, form.save)
 
+        #mimic the responsibilities of the view
         form.instance.author = self.user
         form.instance.assignment = self.assignment
-        
         res = form.save()
 
         self.assertEqual(res.content, form_data['content'])
@@ -108,13 +109,13 @@ class AssignmentFormTests(TestCase):
         other_assignment_image = AssignmentImage.objects.create(image=other_image, 
                                                                 assignment=other_assignment, 
                                                                 keywords='wrong assignment')
-        
+        #ensure the form doesn't show images from the wrong assignment.
         form = StoryForm(assignment=self.assignment)
         self.assertFalse(other_image.image.url in form.as_p())
+
+        #ensure the form doesn't let you pick images from the wrong assignment.
         bad_form_data = {'assignment_image': other_assignment_image.pk,
                          'content': "Not a very good story"} #doesn't contain keywords
-
         form = StoryForm(assignment=self.assignment, data=bad_form_data)
         self.assertFalse(form.is_valid())
-        
         self.assertEqual(form.errors['assignment_image'][0], missing_image_msg)
