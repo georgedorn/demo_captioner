@@ -1,11 +1,14 @@
+"""
+Forms and widgets for handling story submissions.
+"""
+
 import re
 from django import forms
 from django.utils.safestring import mark_safe
 
-from .models import Assignment, Story, AssignmentImage
+from .models import Story, AssignmentImage
 
 from django.utils.encoding import force_unicode
-from django.utils.safestring import mark_safe
 
 keyword_error_msg = "You must use the name of the animal in your story."
 missing_image_msg = "You must select a picture to write about."
@@ -13,7 +16,10 @@ missing_image_msg = "You must select a picture to write about."
 class ImageRadioFieldRenderer(forms.widgets.RadioFieldRenderer):
     """
     Custom version of the default RadioField Renderer,
-    as django's radio field html is very hard to style.
+    as django's radio field html is very hard to apply CSS styles to.
+    
+    This is a work in progress; it may be preferable to skip all of this
+    and just do it all in the template.
     """
 
     def render(self):
@@ -38,13 +44,19 @@ class AssignmentImageChoiceField(forms.ModelChoiceField):
 
 
 class StoryForm(forms.ModelForm):
+    """
+    Fundamental form class to handle story submissions.
+    Includes:
+    - custom assignment-based validation requirements
+    - dynamic image choices per-assignment
+    - some minor layout help
+    """
     assignment_image = AssignmentImageChoiceField(queryset=None,
                                               widget=forms.RadioSelect(attrs={'class':'image_selector'}, renderer=ImageRadioFieldRenderer),
                                               empty_label=None,
                                               label='Choose a picture',
                                               error_messages={'required':missing_image_msg, 
                                                               'invalid_choice':missing_image_msg} #this error is obscure and shouldn't happen to most normal users.
-
                                               )
     
     def __init__(self, *args, **kwargs):

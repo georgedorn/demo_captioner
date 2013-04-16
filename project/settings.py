@@ -1,5 +1,5 @@
 #my_path is relative to settings.py; used to calculate media/static paths.
-import os, sys
+import os
 my_path = os.path.dirname(__file__)
 
 DEBUG = True

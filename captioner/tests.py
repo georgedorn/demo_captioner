@@ -7,14 +7,18 @@ Replace this with more appropriate tests for your application.
 
 from django.test import TestCase
 from django.contrib.auth.models import User
-from django import forms
 
-from .models import Assignment, AssignmentImage, StoryImage, Story
+from .models import Assignment, AssignmentImage, StoryImage
 from .forms import StoryForm, keyword_error_msg
 from django.db.utils import IntegrityError
 from captioner.forms import missing_image_msg
 
-class AssignmentTests(TestCase):
+class AssignmentFormTests(TestCase):
+    """
+    Simple tests of submitting the assignment form.
+    Most of the heavy validation lifting is done in the form,
+    so this is where's I'm concentrating on testing.
+    """
     
     def setUp(self):
         """
@@ -41,6 +45,10 @@ class AssignmentTests(TestCase):
         self.client.login(username='test_user', password='test_pass')
 
     def test_form_bad_keywords(self):
+        """
+        Test to ensure that the form correctly checks for presence of keywords
+        in the story.
+        """
         bad_form_data = {'assignment_image': self.assignment_image.pk,
                          'content': "Not a very good story"} #doesn't contain keywords
         form = StoryForm(data=bad_form_data, assignment=self.assignment)
@@ -50,8 +58,12 @@ class AssignmentTests(TestCase):
         self.assertEqual(content_error[0], keyword_error_msg)
         
     def test_form_good_and_save(self):
+        """
+        Simple test of an ideal condition, to ensure the user/assignment 
+        logic works and is saved with the resulting Story object.
+        """
         form_data = {'assignment_image': self.assignment_image.pk,
-                         'content': "A good story about testing."} #doesn't contain keywords
+                     'content': "A good story about testing."} #doesn't contain keywords
 
         form = StoryForm(data=form_data, assignment=self.assignment)
         self.assertTrue(form.is_valid())
@@ -106,5 +118,3 @@ class AssignmentTests(TestCase):
         self.assertFalse(form.is_valid())
         
         self.assertEqual(form.errors['assignment_image'][0], missing_image_msg)
-
-        
