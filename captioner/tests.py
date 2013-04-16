@@ -42,7 +42,6 @@ class AssignmentFormTests(TestCase):
         self.image = self.images[0]
         self.assignment_image = self.image.assignmentimage_set.all()[0]
         self.user = User.objects.create_user(username='test_user', email='test@test.com', password='test_pass')
-        self.client.login(username='test_user', password='test_pass')
 
     def test_form_bad_keywords(self):
         """

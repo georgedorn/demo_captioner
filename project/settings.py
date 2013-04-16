@@ -1,3 +1,7 @@
+"""
+Demo settings for project;  almost everything is stock Django, except for db config,
+INSTALLED_APPS and MEDIA_ROOT (which is calculated relatively from this file.)
+"""
 #my_path is relative to settings.py; used to calculate media/static paths.
 import os
 my_path = os.path.dirname(__file__)

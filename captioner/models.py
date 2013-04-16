@@ -18,6 +18,15 @@ class Assignment(models.Model):
 
     def get_absolute_url(self):
         return reverse_lazy('create_story', kwargs={'assignment':self.pk,})
+
+class StoryImage(models.Model):
+    """
+    Represents an image that can be used in one or more assignments.
+    """    
+    image = models.ImageField(upload_to='assignment_images')
+    
+    def __unicode__(self):
+        return self.image
     
 class AssignmentImage(models.Model):
     """
@@ -27,25 +36,20 @@ class AssignmentImage(models.Model):
     In another assignment, users must include something the animal eats or 
     the name for a group of this type of animal.
     """
-    image = models.ForeignKey('StoryImage')
-    assignment = models.ForeignKey('Assignment')
-    keywords = models.TextField(max_length=128) #comma-delimited list of acceptable keywords
+    image = models.ForeignKey(StoryImage)
+    assignment = models.ForeignKey(Assignment)
+    keywords = models.TextField(max_length=128, help_text="comma-delimited list of acceptable keywords") 
     
     def __unicode__(self):
         return u'%s for assignment %s' % (self.image.image, self.assignment.name)
 
     @property
     def image_url(self):
+        """
+        Helper for obtaining the url to the actual image file.
+        """
         return self.image.image.url
     
-class StoryImage(models.Model):
-    """
-    Represents an image that can be used in one or more assignments.
-    """    
-    image = models.ImageField(upload_to='assignment_images')
-    
-    def __unicode__(self):
-        return self.image
         
 
 class Story(models.Model):
@@ -60,7 +64,7 @@ class Story(models.Model):
     @property
     def image_url(self):
         """
-        Helper method to retrieve the url for this story.
+        Helper for obtaining the url to the image file for this story.
         """
         return self.assignment_image.image.image.url  #this is gross due to how many related models it goes through
 
